@@ -7228,8 +7228,20 @@
     "messageformat": "Enable AI-powered response suggestions",
     "description": "Label for checkbox to enable LLM response suggestions"
   },
+  "icu:Preferences--llm-response-suggestions-endpoint": {
+    "messageformat": "LLM Provider",
+    "description": "Label for LLM endpoint type dropdown"
+  },
+  "icu:Preferences--llm-response-suggestions-endpoint-openai": {
+    "messageformat": "OpenAI (ChatGPT)",
+    "description": "Option for OpenAI endpoint"
+  },
+  "icu:Preferences--llm-response-suggestions-endpoint-custom": {
+    "messageformat": "Custom",
+    "description": "Option for custom LLM endpoint"
+  },
   "icu:Preferences--llm-response-suggestions-url": {
-    "messageformat": "LLM API URL",
+    "messageformat": "Custom LLM API URL",
     "description": "Label for LLM API URL input field"
   },
   "icu:Preferences--llm-response-suggestions-api-key": {

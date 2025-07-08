@@ -26,6 +26,7 @@ export const STORAGE_UI_KEYS: ReadonlyArray<keyof StorageAccessType> = [
   'localDeleteWarningShown',
   'incoming-call-notification',
   'llm-response-suggestions-enabled',
+  'llm-response-suggestions-endpoint-type',
   'llm-response-suggestions-url',
   'llm-response-suggestions-api-key',
   'navTabsCollapsed',

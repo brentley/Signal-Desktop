@@ -74,6 +74,7 @@ export type StorageAccessType = {
   'sent-media-quality': SentMediaQualitySettingType;
   audioMessage: boolean;
   'llm-response-suggestions-enabled': boolean;
+  'llm-response-suggestions-endpoint-type': 'openai' | 'custom' | undefined;
   'llm-response-suggestions-url': string | undefined;
   'llm-response-suggestions-api-key': string | undefined;
   attachmentMigration_isComplete: boolean;

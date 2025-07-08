@@ -1482,3 +1482,8 @@ $secondary-text-color: light-dark(
   margin-top: 8px;
   color: $secondary-text-color;
 }
+
+.Preferences__required {
+  color: variables.$color-accent-red;
+  margin-left: 4px;
+}

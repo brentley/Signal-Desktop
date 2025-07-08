@@ -23,12 +23,15 @@ export function ResponseSuggestions({
   const [suggestions, setSuggestions] = useState<Array<ResponseSuggestion>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
   // Check if the feature is enabled
   useEffect(() => {
     const checkEnabled = () => {
       const enabled = window.storage.get('llm-response-suggestions-enabled') ?? false;
+      const apiKey = window.storage.get('llm-response-suggestions-api-key');
       setIsEnabled(enabled);
+      setHasApiKey(!!apiKey);
     };
 
     checkEnabled();
@@ -109,7 +112,7 @@ export function ResponseSuggestions({
     }
   }, [conversation]);
 
-  if (!isEnabled) {
+  if (!isEnabled || !hasApiKey) {
     return null;
   }
 

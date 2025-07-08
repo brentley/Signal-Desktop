@@ -149,6 +149,7 @@ export type PropsDataType = {
   hasTextFormatting: boolean;
   hasTypingIndicators: boolean;
   hasLLMResponseSuggestions: boolean;
+  llmResponseSuggestionsEndpointType: 'openai' | 'custom' | undefined;
   llmResponseSuggestionsUrl: string | undefined;
   llmResponseSuggestionsApiKey: string | undefined;
   page: Page;
@@ -308,6 +309,7 @@ type PropsFunctionType = {
   
   // LLM Settings
   onLLMResponseSuggestionsChange: CheckboxChangeHandlerType;
+  onLLMResponseSuggestionsEndpointTypeChange: (value: 'openai' | 'custom') => unknown;
   onLLMResponseSuggestionsUrlChange: (value: string) => unknown;
   onLLMResponseSuggestionsApiKeyChange: (value: string) => unknown;
 
@@ -429,6 +431,7 @@ export function Preferences({
   hasTextFormatting,
   hasTypingIndicators,
   hasLLMResponseSuggestions,
+  llmResponseSuggestionsEndpointType,
   llmResponseSuggestionsUrl,
   llmResponseSuggestionsApiKey,
   i18n,
@@ -487,6 +490,7 @@ export function Preferences({
   onWhoCanFindMeChange,
   onZoomFactorChange,
   onLLMResponseSuggestionsChange,
+  onLLMResponseSuggestionsEndpointTypeChange,
   onLLMResponseSuggestionsUrlChange,
   onLLMResponseSuggestionsApiKeyChange,
   otherTabsUnreadStats,
@@ -1609,21 +1613,44 @@ export function Preferences({
           {hasLLMResponseSuggestions && (
             <>
               <div className="Preferences__padding">
-                <label htmlFor="llm-url">
-                  {i18n('icu:Preferences--llm-response-suggestions-url')}
+                <label htmlFor="llm-endpoint-type">
+                  {i18n('icu:Preferences--llm-response-suggestions-endpoint')}
                 </label>
-                <input
-                  type="text"
-                  id="llm-url"
-                  className="Preferences__input"
-                  value={llmResponseSuggestionsUrl || ''}
-                  onChange={e => onLLMResponseSuggestionsUrlChange(e.target.value)}
-                  placeholder="https://your-llm-api.com/v1/chat/completions"
+                <Select
+                  id="llm-endpoint-type"
+                  options={[
+                    {
+                      value: 'openai',
+                      text: i18n('icu:Preferences--llm-response-suggestions-endpoint-openai'),
+                    },
+                    {
+                      value: 'custom',
+                      text: i18n('icu:Preferences--llm-response-suggestions-endpoint-custom'),
+                    },
+                  ]}
+                  value={llmResponseSuggestionsEndpointType || 'openai'}
+                  onChange={value => onLLMResponseSuggestionsEndpointTypeChange(value as 'openai' | 'custom')}
                 />
               </div>
+              {llmResponseSuggestionsEndpointType === 'custom' && (
+                <div className="Preferences__padding">
+                  <label htmlFor="llm-url">
+                    {i18n('icu:Preferences--llm-response-suggestions-url')}
+                  </label>
+                  <input
+                    type="text"
+                    id="llm-url"
+                    className="Preferences__input"
+                    value={llmResponseSuggestionsUrl || ''}
+                    onChange={e => onLLMResponseSuggestionsUrlChange(e.target.value)}
+                    placeholder="https://your-llm-api.com/v1/chat/completions"
+                  />
+                </div>
+              )}
               <div className="Preferences__padding">
                 <label htmlFor="llm-api-key">
                   {i18n('icu:Preferences--llm-response-suggestions-api-key')}
+                  <span className="Preferences__required">*</span>
                 </label>
                 <input
                   type="password"
@@ -1632,6 +1659,7 @@ export function Preferences({
                   value={llmResponseSuggestionsApiKey || ''}
                   onChange={e => onLLMResponseSuggestionsApiKeyChange(e.target.value)}
                   placeholder={i18n('icu:Preferences--llm-response-suggestions-api-key-placeholder')}
+                  required
                 />
               </div>
               <div className="Preferences__description">

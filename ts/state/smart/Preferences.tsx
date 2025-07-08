@@ -498,6 +498,7 @@ export function SmartPreferences(): JSX.Element | null {
   const hasReadReceipts = items['read-receipt-setting'] ?? false;
   const hasTypingIndicators = items.typingIndicators ?? false;
   const hasLLMResponseSuggestions = items['llm-response-suggestions-enabled'] ?? false;
+  const llmResponseSuggestionsEndpointType = items['llm-response-suggestions-endpoint-type'];
   const llmResponseSuggestionsUrl = items['llm-response-suggestions-url'];
   const llmResponseSuggestionsApiKey = items['llm-response-suggestions-api-key'];
   const blockedCount =
@@ -621,6 +622,9 @@ export function SmartPreferences(): JSX.Element | null {
   
   const onLLMResponseSuggestionsChange = (value: boolean) => {
     putItem('llm-response-suggestions-enabled', value);
+  };
+  const onLLMResponseSuggestionsEndpointTypeChange = (value: 'openai' | 'custom') => {
+    putItem('llm-response-suggestions-endpoint-type', value);
   };
   const onLLMResponseSuggestionsUrlChange = (value: string) => {
     putItem('llm-response-suggestions-url', value);
@@ -773,6 +777,7 @@ export function SmartPreferences(): JSX.Element | null {
         hasTextFormatting={hasTextFormatting}
         hasTypingIndicators={hasTypingIndicators}
         hasLLMResponseSuggestions={hasLLMResponseSuggestions}
+        llmResponseSuggestionsEndpointType={llmResponseSuggestionsEndpointType}
         llmResponseSuggestionsUrl={llmResponseSuggestionsUrl}
         llmResponseSuggestionsApiKey={llmResponseSuggestionsApiKey}
         i18n={i18n}
@@ -837,6 +842,7 @@ export function SmartPreferences(): JSX.Element | null {
         onWhoCanSeeMeChange={onWhoCanSeeMeChange}
         onZoomFactorChange={onZoomFactorChange}
         onLLMResponseSuggestionsChange={onLLMResponseSuggestionsChange}
+        onLLMResponseSuggestionsEndpointTypeChange={onLLMResponseSuggestionsEndpointTypeChange}
         onLLMResponseSuggestionsUrlChange={onLLMResponseSuggestionsUrlChange}
         onLLMResponseSuggestionsApiKeyChange={onLLMResponseSuggestionsApiKeyChange}
         otherTabsUnreadStats={otherTabsUnreadStats}

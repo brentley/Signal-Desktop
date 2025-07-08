@@ -34,10 +34,20 @@ export class LLMResponseSuggestionsService {
     conversation: ConversationModel
   ): Promise<Array<ResponseSuggestion>> {
     const isEnabled = window.storage.get('llm-response-suggestions-enabled');
-    const apiUrl = window.storage.get('llm-response-suggestions-url');
+    const endpointType = window.storage.get('llm-response-suggestions-endpoint-type') || 'openai';
+    const customUrl = window.storage.get('llm-response-suggestions-url');
     const apiKey = window.storage.get('llm-response-suggestions-api-key');
 
-    if (!isEnabled || !apiUrl || !apiKey) {
+    if (!isEnabled || !apiKey) {
+      return [];
+    }
+
+    // Determine the API URL based on endpoint type
+    const apiUrl = endpointType === 'openai' 
+      ? 'https://api.openai.com/v1/chat/completions'
+      : customUrl;
+
+    if (!apiUrl) {
       return [];
     }
 
@@ -53,7 +63,7 @@ export class LLMResponseSuggestionsService {
       const chatHistory = this.formatChatHistory(messages, conversation);
       
       // Call the LLM API
-      const suggestions = await this.callLLMAPI(apiUrl, apiKey, chatHistory);
+      const suggestions = await this.callLLMAPI(apiUrl, apiKey, chatHistory, endpointType);
       
       return suggestions;
     } catch (error) {
@@ -118,7 +128,8 @@ export class LLMResponseSuggestionsService {
   private async callLLMAPI(
     apiUrl: string,
     apiKey: string,
-    chatHistory: string
+    chatHistory: string,
+    endpointType: 'openai' | 'custom' | undefined
   ): Promise<Array<ResponseSuggestion>> {
     const systemPrompt = `You are a helpful assistant that suggests personalized message responses based on chat history. 
 Analyze the conversation and suggest 3 different responses that sound like "Me" based on their writing style, tone, and typical responses.
@@ -137,7 +148,7 @@ Example format: ["Response 1", "Response 2", "Response 3"]`;
           'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo', // This can be customized based on the LLM
+          model: endpointType === 'openai' ? 'gpt-4-turbo-preview' : 'gpt-3.5-turbo',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
