@@ -25,11 +25,52 @@
     gap: 8px;
     padding: 16px;
   }
+  
+  &--error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 12px;
+  }
 }
 
 .ResponseSuggestions__loading-text {
   @include mixins.font-body-2;
   color: light-dark(variables.$color-gray-60, variables.$color-gray-25);
+}
+
+.ResponseSuggestions__error-text {
+  @include mixins.font-body-2;
+  color: light-dark(variables.$color-accent-red, variables.$color-accent-red);
+  flex: 1;
+}
+
+.ResponseSuggestions__retry {
+  @include mixins.button-reset;
+  @include mixins.font-body-2-bold;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: light-dark(variables.$color-ultramarine, variables.$color-ultramarine-light);
+  transition: background-color 0.2s;
+  
+  &:hover {
+    @include mixins.light-theme {
+      background: variables.$color-gray-05;
+    }
+    @include mixins.dark-theme {
+      background: variables.$color-gray-80;
+    }
+  }
+  
+  &:active {
+    @include mixins.light-theme {
+      background: variables.$color-gray-10;
+    }
+    @include mixins.dark-theme {
+      background: variables.$color-gray-75;
+    }
+  }
 }
 
 .ResponseSuggestions__header {

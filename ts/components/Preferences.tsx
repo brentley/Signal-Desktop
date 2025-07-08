@@ -1638,12 +1638,19 @@ export function Preferences({
                     {i18n('icu:Preferences--llm-response-suggestions-url')}
                   </label>
                   <input
-                    type="text"
+                    type="url"
                     id="llm-url"
                     className="Preferences__input"
                     value={llmResponseSuggestionsUrl || ''}
-                    onChange={e => onLLMResponseSuggestionsUrlChange(e.target.value)}
+                    onChange={e => {
+                      const value = e.target.value;
+                      // Basic URL validation
+                      if (!value || value.startsWith('http://') || value.startsWith('https://')) {
+                        onLLMResponseSuggestionsUrlChange(value);
+                      }
+                    }}
                     placeholder="https://your-llm-api.com/v1/chat/completions"
+                    pattern="https?://.+"
                   />
                 </div>
               )}

@@ -15,6 +15,8 @@ export type ResponseSuggestionsProps = {
   i18n: LocalizerType;
 };
 
+type ErrorType = 'network' | 'api' | 'rate-limit' | 'invalid-response' | null;
+
 export function ResponseSuggestions({
   conversation,
   onSelectSuggestion,
@@ -24,6 +26,8 @@ export function ResponseSuggestions({
   const [isLoading, setIsLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [error, setError] = useState<ErrorType>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   // Check if the feature is enabled
   useEffect(() => {
@@ -50,7 +54,14 @@ export function ResponseSuggestions({
 
   // Fetch suggestions when conversation changes
   useEffect(() => {
-    if (!isEnabled) {
+    if (!isEnabled || !hasApiKey) {
+      return;
+    }
+
+    // Rate limiting: Don't fetch if we fetched in the last 30 seconds
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTime;
+    if (timeSinceLastFetch < 30000) {
       return;
     }
 
@@ -59,6 +70,7 @@ export function ResponseSuggestions({
     const fetchSuggestions = async () => {
       setIsLoading(true);
       setSuggestions([]);
+      setError(null);
 
       try {
         const newSuggestions = await llmResponseSuggestionsService.getResponseSuggestions(
@@ -67,11 +79,26 @@ export function ResponseSuggestions({
         
         if (!isCancelled) {
           setSuggestions(newSuggestions);
+          setLastFetchTime(Date.now());
         }
-      } catch (error) {
-        // Error is already logged in the service
+      } catch (err) {
         if (!isCancelled) {
           setSuggestions([]);
+          
+          // Determine error type
+          if (err instanceof Error) {
+            if (err.message.includes('rate limit')) {
+              setError('rate-limit');
+            } else if (err.message.includes('network') || err.message.includes('fetch')) {
+              setError('network');
+            } else if (err.message.includes('API') || err.message.includes('401') || err.message.includes('403')) {
+              setError('api');
+            } else {
+              setError('invalid-response');
+            }
+          } else {
+            setError('invalid-response');
+          }
         }
       } finally {
         if (!isCancelled) {
@@ -85,7 +112,7 @@ export function ResponseSuggestions({
     return () => {
       isCancelled = true;
     };
-  }, [conversation, isEnabled]);
+  }, [conversation, isEnabled, hasApiKey, lastFetchTime]);
 
   const handleSelectSuggestion = useCallback(
     (suggestion: ResponseSuggestion) => {
@@ -99,14 +126,32 @@ export function ResponseSuggestions({
   const handleRefresh = useCallback(async () => {
     setIsLoading(true);
     setSuggestions([]);
+    setError(null);
+    setLastFetchTime(0); // Reset rate limiting for manual refresh
 
     try {
       const newSuggestions = await llmResponseSuggestionsService.getResponseSuggestions(
         conversation
       );
       setSuggestions(newSuggestions);
-    } catch (error) {
+      setLastFetchTime(Date.now());
+    } catch (err) {
       setSuggestions([]);
+      
+      // Determine error type
+      if (err instanceof Error) {
+        if (err.message.includes('rate limit')) {
+          setError('rate-limit');
+        } else if (err.message.includes('network') || err.message.includes('fetch')) {
+          setError('network');
+        } else if (err.message.includes('API') || err.message.includes('401') || err.message.includes('403')) {
+          setError('api');
+        } else {
+          setError('invalid-response');
+        }
+      } else {
+        setError('invalid-response');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +168,27 @@ export function ResponseSuggestions({
         <span className="ResponseSuggestions__loading-text">
           {i18n('icu:ResponseSuggestions--loading')}
         </span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="ResponseSuggestions ResponseSuggestions--error">
+        <span className="ResponseSuggestions__error-text">
+          {error === 'rate-limit' && i18n('icu:ResponseSuggestions--error-rate-limit')}
+          {error === 'network' && i18n('icu:ResponseSuggestions--error-network')}
+          {error === 'api' && i18n('icu:ResponseSuggestions--error-api')}
+          {error === 'invalid-response' && i18n('icu:ResponseSuggestions--error-invalid-response')}
+        </span>
+        <button
+          type="button"
+          className="ResponseSuggestions__retry"
+          onClick={handleRefresh}
+          aria-label={i18n('icu:ResponseSuggestions--retry')}
+        >
+          {i18n('icu:ResponseSuggestions--retry')}
+        </button>
       </div>
     );
   }

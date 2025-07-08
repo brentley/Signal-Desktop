@@ -104,7 +104,10 @@ export class LLMResponseSuggestionsService {
     conversation: ConversationModel
   ): string {
     const ourId = window.ConversationController.getOurConversationIdOrThrow();
-    const conversationTitle = conversation.getTitle();
+    const isGroup = conversation.isGroupV1() || conversation.isGroupV2();
+    
+    // Build a map of participant names
+    const participantNames = new Map<string, string>();
     
     // Sort messages by timestamp (oldest first)
     const sortedMessages = [...messages].sort((a, b) => {
@@ -113,16 +116,91 @@ export class LLMResponseSuggestionsService {
       return aTime - bTime;
     });
 
-    const formattedMessages = sortedMessages
-      .map(msg => {
-        const isFromMe = msg.source === ourId || msg.sourceServiceId === ourId;
-        const sender = isFromMe ? 'Me' : conversationTitle;
-        const body = msg.body || '[No text]';
-        return `${sender}: ${body}`;
-      })
-      .join('\n');
+    let formattedMessages = '';
+    let tokenEstimate = 0;
+    const maxTokens = 2000; // Leave room for system prompt and response
+    
+    // Add conversation context
+    if (isGroup) {
+      const groupName = conversation.getTitle();
+      const memberCount = conversation.get('membersV2')?.length || 0;
+      formattedMessages += `[Group Chat: "${groupName}" with ${memberCount} members]\n\n`;
+    } else {
+      const contactName = conversation.getTitle();
+      formattedMessages += `[Direct conversation with ${contactName}]\n\n`;
+    }
+    
+    // Build chat history, tracking individual senders
+    for (const msg of sortedMessages) {
+      const senderId = msg.source || msg.sourceServiceId;
+      const isFromMe = senderId === ourId;
+      
+      let senderName: string;
+      if (isFromMe) {
+        senderName = 'Me';
+      } else if (isGroup && senderId) {
+        // Get or cache the sender's name
+        if (!participantNames.has(senderId)) {
+          const contact = window.ConversationController.get(senderId);
+          const name = contact ? contact.getTitle() : 'Unknown';
+          participantNames.set(senderId, name);
+        }
+        senderName = participantNames.get(senderId) || 'Unknown';
+      } else {
+        // Direct message - use conversation title
+        senderName = conversation.getTitle();
+      }
+      
+      // Handle different message types
+      let content: string;
+      if (msg.deletedForEveryone) {
+        content = '[Message deleted]';
+      } else if (msg.body) {
+        content = msg.body;
+        // Add edit indicator if message was edited
+        if (msg.editHistory && msg.editHistory.length > 0) {
+          content += ' (edited)';
+        }
+      } else if (msg.sticker) {
+        content = '[Sticker]';
+      } else if (msg.attachments && msg.attachments.length > 0) {
+        const types = msg.attachments.map(att => {
+          if (att.contentType?.startsWith('image/')) return 'Photo';
+          if (att.contentType?.startsWith('video/')) return 'Video';
+          if (att.contentType?.startsWith('audio/')) return 'Audio';
+          return 'File';
+        });
+        content = `[${types.join(', ')}]`;
+      } else {
+        content = '[No text]';
+      }
+      
+      // Add reactions if any
+      let reactions = '';
+      if (msg.reactions && msg.reactions.length > 0) {
+        const reactionEmojis = msg.reactions.map(r => r.emoji).join('');
+        reactions = ` [Reactions: ${reactionEmojis}]`;
+      }
+      
+      const line = `${senderName}: ${content}${reactions}\n`;
+      
+      // Rough token estimate (1 token ≈ 4 characters)
+      const lineTokens = Math.ceil(line.length / 4);
+      if (tokenEstimate + lineTokens > maxTokens) {
+        break;
+      }
+      
+      formattedMessages += line;
+      tokenEstimate += lineTokens;
+    }
 
-    return formattedMessages;
+    // Add participant summary for groups
+    if (isGroup && participantNames.size > 0) {
+      const participants = Array.from(participantNames.values()).join(', ');
+      formattedMessages += `\n[Active participants in this conversation: Me, ${participants}]`;
+    }
+
+    return formattedMessages.trim();
   }
 
   private async callLLMAPI(
@@ -132,15 +210,35 @@ export class LLMResponseSuggestionsService {
     endpointType: 'openai' | 'custom' | undefined
   ): Promise<Array<ResponseSuggestion>> {
     const systemPrompt = `You are a helpful assistant that suggests personalized message responses based on chat history. 
-Analyze the conversation and suggest 3 different responses that sound like "Me" based on their writing style, tone, and typical responses.
-The suggestions should be natural continuations of the conversation.
-Keep responses concise and conversational.
+
+Instructions:
+1. Analyze how "Me" writes - their style, tone, vocabulary, and typical responses
+2. Consider the conversation context:
+   - Is this a group chat or direct message?
+   - Who are the participants?
+   - What's the current topic or flow of conversation?
+3. Suggest 3 different responses that:
+   - Sound authentically like "Me" based on their previous messages
+   - Are appropriate continuations of the conversation
+   - Vary in tone/approach (e.g., one friendly, one humorous, one practical)
+   - Are concise and conversational
+   - Fit the relationship dynamics shown in the chat
+
+For group chats, consider:
+- Who "Me" typically responds to
+- The group's communication style
+- Whether to address someone specific or the group
+
 Return ONLY a JSON array with exactly 3 suggested responses, no other text.
 Example format: ["Response 1", "Response 2", "Response 3"]`;
 
     const userPrompt = `Based on this chat history, suggest 3 responses that I might send next:\n\n${chatHistory}`;
 
     try {
+      // Create an AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -156,9 +254,18 @@ Example format: ["Response 1", "Response 2", "Response 3"]`;
           temperature: 0.7,
           max_tokens: 200,
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('rate limit exceeded');
+        }
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('API authentication failed');
+        }
         throw new HTTPError('LLM API request failed', {
           code: response.status,
           headers: {},
@@ -197,6 +304,17 @@ Example format: ["Response 1", "Response 2", "Response 3"]`;
         }));
     } catch (error) {
       log.error('LLMResponseSuggestionsService: API call failed', error);
+      
+      // Handle different error types
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('network timeout');
+        }
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          throw new Error('network error');
+        }
+      }
+      
       throw error;
     }
   }

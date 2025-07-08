@@ -7268,6 +7268,26 @@
     "messageformat": "Refresh suggestions",
     "description": "Aria label for the refresh suggestions button"
   },
+  "icu:ResponseSuggestions--retry": {
+    "messageformat": "Retry",
+    "description": "Button text to retry after error"
+  },
+  "icu:ResponseSuggestions--error-rate-limit": {
+    "messageformat": "Too many requests. Please try again later.",
+    "description": "Error message when rate limited"
+  },
+  "icu:ResponseSuggestions--error-network": {
+    "messageformat": "Network error. Check your connection.",
+    "description": "Error message for network issues"
+  },
+  "icu:ResponseSuggestions--error-api": {
+    "messageformat": "API error. Check your API key.",
+    "description": "Error message for API authentication issues"
+  },
+  "icu:ResponseSuggestions--error-invalid-response": {
+    "messageformat": "Invalid response from LLM.",
+    "description": "Error message for invalid API responses"
+  },
   "icu:Preferences--updates": {
     "messageformat": "Updates",
     "description": "Header for settings having to do with updates"
