@@ -148,6 +148,9 @@ export type PropsDataType = {
   hasStoriesDisabled: boolean;
   hasTextFormatting: boolean;
   hasTypingIndicators: boolean;
+  hasLLMResponseSuggestions: boolean;
+  llmResponseSuggestionsUrl: string | undefined;
+  llmResponseSuggestionsApiKey: string | undefined;
   page: Page;
   lastSyncTime?: number;
   notificationContent: NotificationSettingType;
@@ -302,6 +305,11 @@ type PropsFunctionType = {
   onWhoCanSeeMeChange: SelectChangeHandlerType<PhoneNumberSharingMode>;
   onWhoCanFindMeChange: SelectChangeHandlerType<PhoneNumberDiscoverability>;
   onZoomFactorChange: SelectChangeHandlerType<ZoomFactorType>;
+  
+  // LLM Settings
+  onLLMResponseSuggestionsChange: CheckboxChangeHandlerType;
+  onLLMResponseSuggestionsUrlChange: (value: string) => unknown;
+  onLLMResponseSuggestionsApiKeyChange: (value: string) => unknown;
 
   // Localization
   i18n: LocalizerType;
@@ -420,6 +428,9 @@ export function Preferences({
   hasStoriesDisabled,
   hasTextFormatting,
   hasTypingIndicators,
+  hasLLMResponseSuggestions,
+  llmResponseSuggestionsUrl,
+  llmResponseSuggestionsApiKey,
   i18n,
   initialSpellCheckSetting,
   isAutoDownloadUpdatesSupported,
@@ -475,6 +486,9 @@ export function Preferences({
   onWhoCanSeeMeChange,
   onWhoCanFindMeChange,
   onZoomFactorChange,
+  onLLMResponseSuggestionsChange,
+  onLLMResponseSuggestionsUrlChange,
+  onLLMResponseSuggestionsApiKeyChange,
   otherTabsUnreadStats,
   page,
   phoneNumber = '',
@@ -1583,6 +1597,48 @@ export function Preferences({
               {i18n('icu:Preferences__privacy--description')}
             </div>
           </div>
+        </SettingsRow>
+        <SettingsRow title={i18n('icu:Preferences--llm-response-suggestions')}>
+          <Checkbox
+            checked={hasLLMResponseSuggestions}
+            label={i18n('icu:Preferences--llm-response-suggestions-enable')}
+            moduleClassName="Preferences__checkbox"
+            name="llmResponseSuggestions"
+            onChange={onLLMResponseSuggestionsChange}
+          />
+          {hasLLMResponseSuggestions && (
+            <>
+              <div className="Preferences__padding">
+                <label htmlFor="llm-url">
+                  {i18n('icu:Preferences--llm-response-suggestions-url')}
+                </label>
+                <input
+                  type="text"
+                  id="llm-url"
+                  className="Preferences__input"
+                  value={llmResponseSuggestionsUrl || ''}
+                  onChange={e => onLLMResponseSuggestionsUrlChange(e.target.value)}
+                  placeholder="https://your-llm-api.com/v1/chat/completions"
+                />
+              </div>
+              <div className="Preferences__padding">
+                <label htmlFor="llm-api-key">
+                  {i18n('icu:Preferences--llm-response-suggestions-api-key')}
+                </label>
+                <input
+                  type="password"
+                  id="llm-api-key"
+                  className="Preferences__input"
+                  value={llmResponseSuggestionsApiKey || ''}
+                  onChange={e => onLLMResponseSuggestionsApiKeyChange(e.target.value)}
+                  placeholder={i18n('icu:Preferences--llm-response-suggestions-api-key-placeholder')}
+                />
+              </div>
+              <div className="Preferences__description">
+                {i18n('icu:Preferences--llm-response-suggestions-description')}
+              </div>
+            </>
+          )}
         </SettingsRow>
         {showDisappearingTimerDialog && (
           <DisappearingTimeDialog

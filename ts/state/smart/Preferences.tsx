@@ -497,6 +497,9 @@ export function SmartPreferences(): JSX.Element | null {
   const hasLinkPreviews = items.linkPreviews ?? false;
   const hasReadReceipts = items['read-receipt-setting'] ?? false;
   const hasTypingIndicators = items.typingIndicators ?? false;
+  const hasLLMResponseSuggestions = items['llm-response-suggestions-enabled'] ?? false;
+  const llmResponseSuggestionsUrl = items['llm-response-suggestions-url'];
+  const llmResponseSuggestionsApiKey = items['llm-response-suggestions-api-key'];
   const blockedCount =
     (items['blocked-groups']?.length ?? 0) +
     (items['blocked-uuids']?.length ?? 0);
@@ -615,6 +618,17 @@ export function SmartPreferences(): JSX.Element | null {
     'textFormatting',
     true
   );
+  
+  const onLLMResponseSuggestionsChange = (value: boolean) => {
+    putItem('llm-response-suggestions-enabled', value);
+  };
+  const onLLMResponseSuggestionsUrlChange = (value: string) => {
+    putItem('llm-response-suggestions-url', value);
+  };
+  const onLLMResponseSuggestionsApiKeyChange = (value: string) => {
+    putItem('llm-response-suggestions-api-key', value);
+  };
+
   const [lastSyncTime, onLastSyncTimeChange] = createItemsAccess(
     'synced_at',
     undefined
@@ -758,6 +772,9 @@ export function SmartPreferences(): JSX.Element | null {
         hasStoriesDisabled={hasStoriesDisabled}
         hasTextFormatting={hasTextFormatting}
         hasTypingIndicators={hasTypingIndicators}
+        hasLLMResponseSuggestions={hasLLMResponseSuggestions}
+        llmResponseSuggestionsUrl={llmResponseSuggestionsUrl}
+        llmResponseSuggestionsApiKey={llmResponseSuggestionsApiKey}
         i18n={i18n}
         initialSpellCheckSetting={initialSpellCheckSetting}
         isAutoDownloadUpdatesSupported={isAutoDownloadUpdatesSupported}
@@ -819,6 +836,9 @@ export function SmartPreferences(): JSX.Element | null {
         onWhoCanFindMeChange={onWhoCanFindMeChange}
         onWhoCanSeeMeChange={onWhoCanSeeMeChange}
         onZoomFactorChange={onZoomFactorChange}
+        onLLMResponseSuggestionsChange={onLLMResponseSuggestionsChange}
+        onLLMResponseSuggestionsUrlChange={onLLMResponseSuggestionsUrlChange}
+        onLLMResponseSuggestionsApiKeyChange={onLLMResponseSuggestionsApiKeyChange}
         otherTabsUnreadStats={otherTabsUnreadStats}
         page={page}
         pickLocalBackupFolder={pickLocalBackupFolder}

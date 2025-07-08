@@ -7220,6 +7220,42 @@
     "messageformat": "Typing indicators",
     "description": "Label for the typing indicators setting"
   },
+  "icu:Preferences--llm-response-suggestions": {
+    "messageformat": "AI Response Suggestions",
+    "description": "Header for LLM response suggestions settings"
+  },
+  "icu:Preferences--llm-response-suggestions-enable": {
+    "messageformat": "Enable AI-powered response suggestions",
+    "description": "Label for checkbox to enable LLM response suggestions"
+  },
+  "icu:Preferences--llm-response-suggestions-url": {
+    "messageformat": "LLM API URL",
+    "description": "Label for LLM API URL input field"
+  },
+  "icu:Preferences--llm-response-suggestions-api-key": {
+    "messageformat": "API Key",
+    "description": "Label for LLM API key input field"
+  },
+  "icu:Preferences--llm-response-suggestions-api-key-placeholder": {
+    "messageformat": "Enter your API key",
+    "description": "Placeholder text for LLM API key input field"
+  },
+  "icu:Preferences--llm-response-suggestions-description": {
+    "messageformat": "When enabled, recent chat history will be sent to your private LLM to generate personalized response suggestions.",
+    "description": "Description text for LLM response suggestions feature"
+  },
+  "icu:ResponseSuggestions--loading": {
+    "messageformat": "Getting suggestions...",
+    "description": "Loading text shown while fetching response suggestions"
+  },
+  "icu:ResponseSuggestions--title": {
+    "messageformat": "Suggested responses",
+    "description": "Title for the response suggestions section"
+  },
+  "icu:ResponseSuggestions--refresh": {
+    "messageformat": "Refresh suggestions",
+    "description": "Aria label for the refresh suggestions button"
+  },
   "icu:Preferences--updates": {
     "messageformat": "Updates",
     "description": "Header for settings having to do with updates"

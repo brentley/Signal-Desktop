@@ -1,0 +1,149 @@
+// Copyright 2024 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+@use '../mixins';
+@use '../variables';
+
+.ResponseSuggestions {
+  padding: 8px 16px;
+  border-top: 1px solid;
+  
+  @include mixins.light-theme {
+    background: variables.$color-gray-02;
+    border-color: variables.$color-gray-15;
+  }
+  
+  @include mixins.dark-theme {
+    background: variables.$color-gray-90;
+    border-color: variables.$color-gray-65;
+  }
+  
+  &--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+  }
+}
+
+.ResponseSuggestions__loading-text {
+  @include mixins.font-body-2;
+  color: light-dark(variables.$color-gray-60, variables.$color-gray-25);
+}
+
+.ResponseSuggestions__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ResponseSuggestions__title {
+  @include mixins.font-body-2-bold;
+  color: light-dark(variables.$color-gray-60, variables.$color-gray-25);
+}
+
+.ResponseSuggestions__refresh {
+  @include mixins.button-reset;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    @include mixins.light-theme {
+      background: variables.$color-gray-15;
+    }
+    @include mixins.dark-theme {
+      background: variables.$color-gray-75;
+    }
+  }
+  
+  &:active {
+    @include mixins.light-theme {
+      background: variables.$color-gray-20;
+    }
+    @include mixins.dark-theme {
+      background: variables.$color-gray-65;
+    }
+  }
+}
+
+.ResponseSuggestions__refresh-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  
+  @include mixins.light-theme {
+    @include mixins.color-svg(
+      '../images/icons/v3/refresh/refresh.svg',
+      variables.$color-gray-75
+    );
+  }
+  @include mixins.dark-theme {
+    @include mixins.color-svg(
+      '../images/icons/v3/refresh/refresh.svg',
+      variables.$color-gray-15
+    );
+  }
+}
+
+.ResponseSuggestions__bubbles {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ResponseSuggestions__bubble {
+  @include mixins.button-reset;
+  @include mixins.font-body-1;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid;
+  max-width: 100%;
+  text-align: left;
+  transition: all 0.2s;
+  
+  @include mixins.light-theme {
+    background: variables.$color-white;
+    border-color: variables.$color-gray-15;
+    color: variables.$color-gray-90;
+    
+    &:hover {
+      background: variables.$color-gray-05;
+      border-color: variables.$color-gray-25;
+    }
+    
+    &:active {
+      background: variables.$color-gray-10;
+      transform: scale(0.98);
+    }
+  }
+  
+  @include mixins.dark-theme {
+    background: variables.$color-gray-80;
+    border-color: variables.$color-gray-65;
+    color: variables.$color-gray-05;
+    
+    &:hover {
+      background: variables.$color-gray-75;
+      border-color: variables.$color-gray-60;
+    }
+    
+    &:active {
+      background: variables.$color-gray-70;
+      transform: scale(0.98);
+    }
+  }
+  
+  @include mixins.keyboard-mode {
+    &:focus {
+      outline: 2px solid variables.$color-ultramarine;
+      outline-offset: 2px;
+    }
+  }
+}

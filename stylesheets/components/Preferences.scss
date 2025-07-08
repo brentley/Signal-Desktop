@@ -1426,3 +1426,59 @@ $secondary-text-color: light-dark(
     max-width: 360px;
   }
 }
+
+// LLM Response Suggestions styles
+.Preferences__input {
+  @include mixins.font-body-1;
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid;
+  
+  @include mixins.light-theme {
+    background: variables.$color-white;
+    border-color: variables.$color-gray-15;
+    color: variables.$color-gray-90;
+    
+    &::placeholder {
+      color: variables.$color-gray-45;
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: variables.$color-ultramarine;
+    }
+  }
+  
+  @include mixins.dark-theme {
+    background: variables.$color-gray-80;
+    border-color: variables.$color-gray-65;
+    color: variables.$color-gray-05;
+    
+    &::placeholder {
+      color: variables.$color-gray-45;
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: variables.$color-ultramarine;
+    }
+  }
+}
+
+.Preferences__padding {
+  padding: 12px 0;
+  
+  label {
+    @include mixins.font-body-2-bold;
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+
+.Preferences__description {
+  @include mixins.font-body-2;
+  margin-top: 8px;
+  color: $secondary-text-color;
+}

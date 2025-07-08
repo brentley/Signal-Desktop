@@ -87,6 +87,7 @@ import type { EmojiSkinTone } from './fun/data/emojis';
 import type { StickerPackType, StickerType } from '../state/ducks/stickers';
 import { FunPickerButton } from './fun/FunButton';
 import { isFunPickerEnabled } from './fun/isFunPickerEnabled';
+import { ResponseSuggestions } from './conversation/ResponseSuggestions';
 
 export type OwnProps = Readonly<{
   acceptedMessageRequest: boolean | null;
@@ -389,6 +390,15 @@ export const CompositionArea = memo(function CompositionArea({
       inputApiRef.current.submit();
     }
   }, [inputApiRef, setLarge]);
+
+  const handleSelectSuggestion = useCallback(
+    (text: string) => {
+      if (inputApiRef.current) {
+        inputApiRef.current.setContents(text, [], true);
+      }
+    },
+    [inputApiRef]
+  );
 
   const draftEditMessageBody = draftEditMessage?.body;
   const editedMessageId = draftEditMessage?.targetMessageId;
@@ -1175,6 +1185,19 @@ export const CompositionArea = memo(function CompositionArea({
           </div>
         ) : null}
       </div>
+      {(() => {
+        const conversation = window.ConversationController.get(conversationId);
+        if (!conversation || !acceptedMessageRequest || removalStage) {
+          return null;
+        }
+        return (
+          <ResponseSuggestions
+            conversation={conversation}
+            onSelectSuggestion={handleSelectSuggestion}
+            i18n={i18n}
+          />
+        );
+      })()}
       <div
         className={classNames(
           'CompositionArea__row',

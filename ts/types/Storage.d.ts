@@ -73,6 +73,9 @@ export type StorageAccessType = {
   'read-receipt-setting': boolean;
   'sent-media-quality': SentMediaQualitySettingType;
   audioMessage: boolean;
+  'llm-response-suggestions-enabled': boolean;
+  'llm-response-suggestions-url': string | undefined;
+  'llm-response-suggestions-api-key': string | undefined;
   attachmentMigration_isComplete: boolean;
   attachmentMigration_lastProcessedIndex: number;
   blocked: ReadonlyArray<string>;
